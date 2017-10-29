@@ -57,7 +57,7 @@ void loop()
     // On an 800x480 uLCD-70D that means if you want to paint the whole screen, you get 3.1 FPS.
     // Blue is "on" red is "off."
     diablo16.draw_circle_filled(100, 100, 100, state ? blue : red);
-	state = curr_state;
+    state = curr_state;
   }
 }
 ```
