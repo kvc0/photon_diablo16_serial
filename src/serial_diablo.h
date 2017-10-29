@@ -6,7 +6,7 @@
 namespace diablo
 {
   /*
-   * An implementation of the Diablo16 serial environment graphics command set 5.2:
+   * An implementation of the Diablo16 serial environment command set:
    * http://www.4dsystems.com.au/productpages/DIABLO16/downloads/DIABLO16_serialcmdmanual_R_2_0.pdf
    *
    * blocking arguments specify whether you want to wait for the ack inline with the call
@@ -121,6 +121,7 @@ namespace diablo
      * The “Draw Polyline” command can be used to create complex raster graphics by loading the arrays from serial input or from MEDIA with very little code requirement.
      *
      * ***NOTE*** the vertices argument is a little subtle.  Take a moment to ponder it.
+     * ***NOTE*** See poly_points() if you prefer an {x,y},{x,y} expression style (generally more natural).
      *
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.8
@@ -140,6 +141,7 @@ namespace diablo
      * The Draw Polygon command can be used to create complex raster graphics by loading the arrays from serial input or from MEDIA with very little code requirement.
      *
      * ***NOTE*** the vertices argument is a little subtle.  Take a moment to ponder it.
+     * ***NOTE*** See poly_points() if you prefer an {x,y},{x,y} expression style (generally more natural).
      *
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.9

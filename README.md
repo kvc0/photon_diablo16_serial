@@ -93,3 +93,23 @@ Here's one with the synchronous ACK strategy (final parameter in draw_circle_fil
 0000035259 [app.diablo] TRACE: Latency draw_circle_filled: 9ms
 ```
 There's no previous message to ack, but we have to pay the time waiting up front for the Diablo16 to ACK.
+
+
+## Examples
+### Polygon
+#### Hardest possible way to draw a square
+```
+diablo16.draw_polygon_filled({
+  100,200,200,100, // X values
+  100,100,200,200  // Y values
+}, state ? blue : red);
+```
+#### Square with poly_points
+Remember, this convenience costs O(n) compute _and_ memory.
+Doesn't matter for the odd square but it can add up.
+```
+diablo->draw_polygon_filled(diablo::poly_points({
+  {100,100},{200,100},
+  {200,200},{100,200}
+}), state ? on_color : off_color);
+```
