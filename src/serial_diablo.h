@@ -20,6 +20,7 @@ namespace diablo
     Diablo(Stream& serial) :
       serial(&serial),
       pending_ack(false),
+      outstanding_words(0),
       log("app.diablo")
     {}
 
@@ -221,7 +222,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("outline_color", LOG_LEVEL_INFO, true, {0xFF41,
         setting
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -233,7 +234,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("contrast", LOG_LEVEL_INFO, true, {0xFF40,
         setting
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -247,7 +248,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("line_pattern", LOG_LEVEL_INFO, true, {0xFF3F,
         pattern
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -264,7 +265,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("screen_mode", LOG_LEVEL_INFO, true, {0xFF42,
         setting
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -278,7 +279,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("transparency", LOG_LEVEL_INFO, true, {0xFF44,
         enabled ? 1 : 0
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -291,7 +292,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("transparent_color", LOG_LEVEL_INFO, true, {0xFF45,
         color
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /*
@@ -308,7 +309,7 @@ namespace diablo
     {
       return invoke_graphics<uint16_t>("set_graphics_parameters", LOG_LEVEL_INFO, true, {0xFF83,
         function, value
-      }, [this]()->uint16_t{return read_word();});
+      }, [this]()->uint16_t{return read_word();}, 1);
     }
 
     /////////////////////////////////////    5.3 Media Commands    /////////////////////////////////////
@@ -323,7 +324,7 @@ namespace diablo
     bool media_init()
     {
       return invoke_graphics<bool>("media_init", LOG_LEVEL_INFO, true, {0xFF25
-      }, [this]()->bool{return 1 == read_word();});
+      }, [this]()->bool{return 1 == read_word();}, 1);
     }
 
     /*
@@ -362,6 +363,8 @@ namespace diablo
     const Logger log;
 
     bool pending_ack;
+    uint8_t outstanding_words;
+    const char *previous_command = "";
     Stream *serial;
 
     static AckOnly no_response(){return 0;}
@@ -369,47 +372,79 @@ namespace diablo
     // Emits a log message for how long the function took at the indicated log level.
     // Handles fetching the ack for a previous command if necessary.
     template<typename Response, typename Responder = std::function<Response ()>>
-    Response invoke_graphics_compound_request(const char *name, LogLevel level, bool blocking, std::vector<std::vector<uint16_t>> request, Responder responder = no_response)
+    Response invoke_graphics_compound_request(const char *name, LogLevel level, bool blocking, std::vector<std::vector<uint16_t>> request, Responder responder=no_response, uint8_t response_words=0)
     {
       log.trace("Invoking: %s", name);
       unsigned long start = millis();
+
+      // Handle leftover state
       if(pending_ack)
       {
-        ack();
+        if(!ack()) return Response();
         pending_ack = false;
-        log.trace("Previous command ack: %dms", millis() - start);
+        log.trace("Previous command ack. Command: %s, %dms", previous_command, millis() - start);
         start = millis();
       }
+      while(outstanding_words > 0)
+      {
+        uint16_t garbage = read_word();
+        if(garbage == 0xDEAD)
+        {
+          log.error("Error waiting for response from: %s", previous_command);
+          return Response();
+        }
+        outstanding_words--;
+      }
+
+
       log.trace("Writing request");
       for(std::vector<uint16_t> &portion : request) write_words(portion);
+
+
       if(blocking)
       {
         log.trace("Blocking for ACK");
-        ack();
+        if(!ack())
+        {
+          pending_ack = true;
+        }
       } else
       {
         pending_ack = true;
+        previous_command = name;
       }
-      log.trace("Getting response");
-      Response r = responder();
+
+      // Get the response.
+      // If we need to ack first, we can't get the response & it'll be ignored.
+      Response r;
+      if(pending_ack)
+      {
+        outstanding_words += response_words;
+        r = Response();
+      }
+      else
+      {
+        log.trace("Getting response");
+        r = responder();
+      }
       log(level, "Latency %s: %dms", name, millis() - start);
       return r;
     }
 
     template<typename Response, typename Responder = std::function<Response ()>>
-    Response invoke_graphics(const char *name, LogLevel level, bool blocking, std::vector<uint16_t> request, Responder responder = no_response)
+    Response invoke_graphics(const char *name, LogLevel level, bool blocking, std::vector<uint16_t> request, Responder responder=no_response, uint8_t response_words=0)
     {
-      return invoke_graphics_compound_request<Response>(name, level, blocking, {request}, responder);
+      return invoke_graphics_compound_request<Response>(name, level, blocking, {request}, responder, response_words);
     }
 
     // Block for ACK byte.
-    void ack()
+    bool ack()
     {
       static uint8_t timeout_length = 100;
       static uint8_t give_up_length = 4000;
       unsigned long timeout = millis() + timeout_length;
       unsigned long give_up = millis() + give_up_length;
-      int response;
+      int response = -1;
       do
       {
         if(millis() > timeout)
@@ -418,10 +453,18 @@ namespace diablo
           log.warn("Timing out waiting for ACK :-(");
           timeout = millis() + timeout_length;
         }
-        response = serial->read();
+        if(serial->available() > 0) response = serial->read();
       } while(response == -1);
-      if(response == 0x06) log.trace("Successful ack");
-      else log.error("Failed ack: %d", response);
+      if(response == 0x06)
+      {
+        log.trace("Successful ack");
+        return true;
+      }
+      else
+      {
+        log.error("Failed ack: %d", response);
+        return false;
+      }
     }
 
     // MostSignificantByte, LeastSignificantByte for each 2 byte word.
@@ -444,7 +487,10 @@ namespace diablo
       {
         if(millis() > timeout)
         {
-          if(millis() > give_up) return 0xDEAD;
+          if(millis() > give_up)
+          {
+            return 0xDEAD;
+          }
           log.warn("Timing out waiting for response :-(");
           timeout = millis() + timeout_length;
         }
