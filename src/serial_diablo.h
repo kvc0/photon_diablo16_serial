@@ -341,6 +341,18 @@ namespace diablo
     }
 
     /*
+     * The Set Sector Address command sets the media memory internal Address pointer for sector access.
+     *
+     * 5.3.2
+     */
+    void media_set_sector(uint32_t address, bool blocking = false)
+    {
+      invoke_graphics<AckOnly>("media_set_sector", LOG_LEVEL_TRACE, blocking, {0xFF2E,
+        (uint16_t)(address >> 16), (uint16_t)(address & 0xFFFF)
+      });
+    }
+
+    /*
      * Displays an image from the media storage at the specified co-ordinates.
      * The image address is previously specified with the “Set Byte Address” command or “Set Sector Address” command.
      *

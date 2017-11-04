@@ -27,7 +27,7 @@ void setup()
   //   Just go into Workshop4 and go File->Options->Serial and crank it up to 200000 for lulz.
   //   Or just use 9600 if you don't have high expectations, it's honestly quick enough usually.
   Serial1.begin(200000);
-  
+
   pinMode(SCREEN_RESETPIN, OUTPUT);
   Log.info("Resetting screen");
   digitalWrite(SCREEN_RESETPIN, LOW);
@@ -49,7 +49,7 @@ void loop()
   static const uint16_t blue      = 0b0000000000011111;
   // Toggle state every 750ms.
   bool curr_state = millis() / 750 % 2 == 0;
-  
+
   if(state != curr_state)
   {
     // Only write to the screen if the state is changed.
@@ -112,4 +112,19 @@ diablo->draw_polygon_filled(diablo::poly_points({
   {100,100},{200,100},
   {200,200},{100,200}
 }), state ? on_color : off_color);
+```
+### Formatting Gc GraphicsComposer file as arrays
+If you're doing raw uSD image access, you'll want some way to easily consume your files in source code.  Sectorwise access is pretty good.  If you name your image files without any spaces you can use this to generate a 2d uint_16_t array initialization with size [][2]:
+```
+echo 'uint16_t offsets[][2] = {' > generated_array.txt
+cat super_cool_graphicscomposer_file.Gc | grep '#constant' | awk '{print($3 " " $4 " //" $2)}' | sed 's/$media_SetSector(//g'| sed 's/);//g' | awk '{print( "    {"$1" "$2"}, "$3 )}' >> generated_array.txt
+echo '}' >> generated_array.txt
+```
+To use it with the uint_32_t apis (like media_set_sector) just do something like
+```
+uint32_t get_offset(uint_16_t image_index)
+{
+  uint16_t *offset = offsets[image_index];
+  return ((uint32_t)offset[0]) << 16 | offset[1];
+}
 ```
