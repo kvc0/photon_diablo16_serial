@@ -40,18 +40,18 @@ namespace diablo
       *
       * 5.2.1
       */
-    void clear(bool blocking = false)
+    void clear(LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("clear", LOG_LEVEL_TRACE, blocking, {0xFF82});
+      invoke_graphics<AckOnly>("clear", log_level, blocking, {0xFF82});
     }
 
     /*
      * x, y = center of circle
      * 5.2.3
      */
-    void draw_circle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_circle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_circle", LOG_LEVEL_TRACE, blocking, {0xFF78,
+      invoke_graphics<AckOnly>("draw_circle", log_level, blocking, {0xFF78,
         x, y, radius, color
       });
     }
@@ -60,9 +60,9 @@ namespace diablo
      * x, y = center of circle
      * 5.2.4
      */
-    void draw_circle_filled(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_circle_filled(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_circle_filled", LOG_LEVEL_TRACE, blocking, {0xFF77,
+      invoke_graphics<AckOnly>("draw_circle_filled", log_level, blocking, {0xFF77,
         x, y, radius, color
       });
     }
@@ -77,9 +77,9 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.5
      */
-    void draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_line", LOG_LEVEL_TRACE, blocking, {0xFF7D,
+      invoke_graphics<AckOnly>("draw_line", log_level, blocking, {0xFF7D,
         x1, y1, x2, y2, color
       });
     }
@@ -92,9 +92,9 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.6
      */
-    void draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_rectangle", LOG_LEVEL_TRACE, blocking, {0xFF7A,
+      invoke_graphics<AckOnly>("draw_rectangle", log_level, blocking, {0xFF7A,
         x1, y1, x2, y2, color
       });
     }
@@ -109,9 +109,9 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.7
      */
-    void draw_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_rectangle_filled", LOG_LEVEL_TRACE, blocking, {0xFF79,
+      invoke_graphics<AckOnly>("draw_rectangle_filled", log_level, blocking, {0xFF79,
         x1, y1, x2, y2, color
       });
     }
@@ -127,10 +127,10 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.8
      */
-    void draw_polyline(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_polyline(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polyline", LOG_LEVEL_TRACE, blocking, {
+      invoke_graphics_compound_request<AckOnly>("draw_polyline", log_level, blocking, {
         {0x0015, n}, vertices, {color}
       });
     }
@@ -147,10 +147,10 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.9
      */
-    void draw_polygon(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_polygon(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polygon", LOG_LEVEL_TRACE, blocking, {
+      invoke_graphics_compound_request<AckOnly>("draw_polygon", log_level, blocking, {
         {0x0013, n}, vertices, {color}
       });
     }
@@ -166,10 +166,10 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.10
      */
-    void draw_polygon_filled(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_polygon_filled(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polygon_filled", LOG_LEVEL_TRACE, blocking, {
+      invoke_graphics_compound_request<AckOnly>("draw_polygon_filled", log_level, blocking, {
         {0x0014, n}, vertices, {color}
       });
     }
@@ -180,9 +180,9 @@ namespace diablo
      *
      * 5.2.11
      */
-    void draw_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_triangle", LOG_LEVEL_TRACE, blocking, {0xFF74,
+      invoke_graphics<AckOnly>("draw_triangle", log_level, blocking, {0xFF74,
         x1, y1, x2, y2, x3, y3, color
       });
     }
@@ -192,9 +192,9 @@ namespace diablo
      *
      * 5.2.12
      */
-    void draw_triangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, bool blocking = false)
+    void draw_triangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_triangle_filled", LOG_LEVEL_TRACE, blocking, {0xFF59,
+      invoke_graphics<AckOnly>("draw_triangle_filled", log_level, blocking, {0xFF59,
         x1, y1, x2, y2, x3, y3, color
       });
     }
@@ -205,9 +205,9 @@ namespace diablo
      *
      * 5.2.16
      */
-    void move_origin(uint16_t x, uint16_t y, bool blocking = false)
+    void move_origin(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("move_origin", LOG_LEVEL_TRACE, blocking, {0xFF81,
+      invoke_graphics<AckOnly>("move_origin", log_level, blocking, {0xFF81,
         x, y
       });
     }
@@ -218,9 +218,9 @@ namespace diablo
      * 5.2.30
      * Returns previous setting.
      */
-    uint16_t outline_color(uint16_t setting)
+    uint16_t outline_color(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("outline_color", LOG_LEVEL_INFO, true, {0xFF41,
+      return invoke_graphics<uint16_t>("outline_color", log_level, true, {0xFF41,
         setting
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -230,9 +230,9 @@ namespace diablo
      * 5.2.31
      * Returns previous setting.
      */
-    uint16_t contrast(uint16_t setting)
+    uint16_t contrast(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("contrast", LOG_LEVEL_INFO, true, {0xFF40,
+      return invoke_graphics<uint16_t>("contrast", log_level, true, {0xFF40,
         setting
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -244,9 +244,9 @@ namespace diablo
      * 5.2.33
      * Returns previous setting.
      */
-    uint16_t line_pattern(uint16_t pattern)
+    uint16_t line_pattern(uint16_t pattern, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("line_pattern", LOG_LEVEL_INFO, true, {0xFF3F,
+      return invoke_graphics<uint16_t>("line_pattern", log_level, true, {0xFF3F,
         pattern
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -261,9 +261,9 @@ namespace diablo
      * 5.2.34
      * Returns previous setting.
      */
-    uint16_t screen_mode(uint16_t setting)
+    uint16_t screen_mode(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("screen_mode", LOG_LEVEL_INFO, true, {0xFF42,
+      return invoke_graphics<uint16_t>("screen_mode", log_level, true, {0xFF42,
         setting
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -275,9 +275,9 @@ namespace diablo
      * 5.2.35
      * Returns previous setting.
      */
-    uint16_t transparency(bool enabled)
+    uint16_t transparency(bool enabled, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("transparency", LOG_LEVEL_INFO, true, {0xFF44,
+      return invoke_graphics<uint16_t>("transparency", log_level, true, {0xFF44,
         enabled ? 1 : 0
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -288,9 +288,9 @@ namespace diablo
      * 5.2.36
      * Returns previous setting.
      */
-    uint16_t transparent_color(uint16_t color)
+    uint16_t transparent_color(uint16_t color, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("transparent_color", LOG_LEVEL_INFO, true, {0xFF45,
+      return invoke_graphics<uint16_t>("transparent_color", log_level, true, {0xFF45,
         color
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -305,9 +305,9 @@ namespace diablo
      * 5.2.37
      * Returns previous setting.
      */
-    uint16_t set_graphics_parameters(uint16_t function, uint16_t value)
+    uint16_t set_graphics_parameters(uint16_t function, uint16_t value, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("set_graphics_parameters", LOG_LEVEL_INFO, true, {0xFF83,
+      return invoke_graphics<uint16_t>("set_graphics_parameters", log_level, true, {0xFF83,
         function, value
       }, [this]()->uint16_t{return read_word();}, 1);
     }
@@ -321,9 +321,9 @@ namespace diablo
      * 5.3.1
      * True if init successful.
      */
-    bool media_init()
+    bool media_init(LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<bool>("media_init", LOG_LEVEL_INFO, true, {0xFF25
+      return invoke_graphics<bool>("media_init", log_level, true, {0xFF25
       }, [this]()->bool{return 1 == read_word();}, 1);
     }
 
@@ -333,9 +333,9 @@ namespace diablo
      *
      * 5.3.2
      */
-    void media_set_byte(uint32_t address, bool blocking = false)
+    void media_set_byte(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_set_byte", LOG_LEVEL_TRACE, blocking, {0xFF2F,
+      invoke_graphics<AckOnly>("media_set_byte", log_level, blocking, {0xFF2F,
         (uint16_t)(address >> 16), (uint16_t)(address & 0xFFFF)
       });
     }
@@ -345,9 +345,9 @@ namespace diablo
      *
      * 5.3.2
      */
-    void media_set_sector(uint32_t address, bool blocking = false)
+    void media_set_sector(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_set_sector", LOG_LEVEL_TRACE, blocking, {0xFF2E,
+      invoke_graphics<AckOnly>("media_set_sector", log_level, blocking, {0xFF2E,
         (uint16_t)(address >> 16), (uint16_t)(address & 0xFFFF)
       });
     }
@@ -361,9 +361,9 @@ namespace diablo
      * x, y => top left corner where the image is to be drawn.
      * 5.3.11
      */
-    void media_image_raw(uint16_t x, uint16_t y, bool blocking = false)
+    void media_image_raw(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_image_raw", LOG_LEVEL_TRACE, blocking, {0xFF27,
+      invoke_graphics<AckOnly>("media_image_raw", log_level, blocking, {0xFF27,
         x, y
       });
     }
