@@ -17,11 +17,11 @@ namespace diablo
   class Diablo
   {
   public:
-    Diablo(Stream& serial) :
-      serial(&serial),
-      pending_ack(false),
-      outstanding_words(0),
-      log("app.diablo")
+    Diablo(Stream &serial) :
+        log("app.diablo"),
+        pending_ack(false),
+        outstanding_words(0),
+        serial(&serial)
     {}
 
     /**
@@ -49,10 +49,15 @@ namespace diablo
      * x, y = center of circle
      * 5.2.3
      */
-    void draw_circle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_circle(uint16_t x,
+                     uint16_t y,
+                     uint16_t radius,
+                     uint16_t color = 0xFFFF,
+                     LogLevel log_level = LOG_LEVEL_TRACE,
+                     bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_circle", log_level, blocking, {0xFF78,
-        x, y, radius, color
+                                                                    x, y, radius, color
       });
     }
 
@@ -60,10 +65,15 @@ namespace diablo
      * x, y = center of circle
      * 5.2.4
      */
-    void draw_circle_filled(uint16_t x, uint16_t y, uint16_t radius, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_circle_filled(uint16_t x,
+                            uint16_t y,
+                            uint16_t radius,
+                            uint16_t color = 0xFFFF,
+                            LogLevel log_level = LOG_LEVEL_TRACE,
+                            bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_circle_filled", log_level, blocking, {0xFF77,
-        x, y, radius, color
+                                                                           x, y, radius, color
       });
     }
 
@@ -77,10 +87,16 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.5
      */
-    void draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_line(uint16_t x1,
+                   uint16_t y1,
+                   uint16_t x2,
+                   uint16_t y2,
+                   uint16_t color = 0xFFFF,
+                   LogLevel log_level = LOG_LEVEL_TRACE,
+                   bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_line", log_level, blocking, {0xFF7D,
-        x1, y1, x2, y2, color
+                                                                  x1, y1, x2, y2, color
       });
     }
 
@@ -92,10 +108,16 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.6
      */
-    void draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_rectangle(uint16_t x1,
+                        uint16_t y1,
+                        uint16_t x2,
+                        uint16_t y2,
+                        uint16_t color = 0xFFFF,
+                        LogLevel log_level = LOG_LEVEL_TRACE,
+                        bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_rectangle", log_level, blocking, {0xFF7A,
-        x1, y1, x2, y2, color
+                                                                       x1, y1, x2, y2, color
       });
     }
 
@@ -109,10 +131,16 @@ namespace diablo
      * x2, y2 = end coordinates
      * 5.2.7
      */
-    void draw_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_rectangle_filled(uint16_t x1,
+                               uint16_t y1,
+                               uint16_t x2,
+                               uint16_t y2,
+                               uint16_t color = 0xFFFF,
+                               LogLevel log_level = LOG_LEVEL_TRACE,
+                               bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_rectangle_filled", log_level, blocking, {0xFF79,
-        x1, y1, x2, y2, color
+                                                                              x1, y1, x2, y2, color
       });
     }
 
@@ -127,11 +155,14 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.8
      */
-    void draw_polyline(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_polyline(std::vector <uint16_t> vertices,
+                       uint16_t color = 0xFFFF,
+                       LogLevel log_level = LOG_LEVEL_TRACE,
+                       bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
       invoke_graphics_compound_request<AckOnly>("draw_polyline", log_level, blocking, {
-        {0x0015, n}, vertices, {color}
+          {0x0015, n}, vertices, {color}
       });
     }
 
@@ -147,11 +178,14 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.9
      */
-    void draw_polygon(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_polygon(std::vector <uint16_t> vertices,
+                      uint16_t color = 0xFFFF,
+                      LogLevel log_level = LOG_LEVEL_TRACE,
+                      bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
       invoke_graphics_compound_request<AckOnly>("draw_polygon", log_level, blocking, {
-        {0x0013, n}, vertices, {color}
+          {0x0013, n}, vertices, {color}
       });
     }
 
@@ -166,11 +200,14 @@ namespace diablo
      * vertices:  x1, x2, [...], xn, y1, y2, [...], yn.
      * 5.2.10
      */
-    void draw_polygon_filled(std::vector<uint16_t> vertices, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_polygon_filled(std::vector <uint16_t> vertices,
+                             uint16_t color = 0xFFFF,
+                             LogLevel log_level = LOG_LEVEL_TRACE,
+                             bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
       invoke_graphics_compound_request<AckOnly>("draw_polygon_filled", log_level, blocking, {
-        {0x0014, n}, vertices, {color}
+          {0x0014, n}, vertices, {color}
       });
     }
 
@@ -180,10 +217,18 @@ namespace diablo
      *
      * 5.2.11
      */
-    void draw_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_triangle(uint16_t x1,
+                       uint16_t y1,
+                       uint16_t x2,
+                       uint16_t y2,
+                       uint16_t x3,
+                       uint16_t y3,
+                       uint16_t color = 0xFFFF,
+                       LogLevel log_level = LOG_LEVEL_TRACE,
+                       bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_triangle", log_level, blocking, {0xFF74,
-        x1, y1, x2, y2, x3, y3, color
+                                                                      x1, y1, x2, y2, x3, y3, color
       });
     }
 
@@ -192,10 +237,18 @@ namespace diablo
      *
      * 5.2.12
      */
-    void draw_triangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color = 0xFFFF, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void draw_triangle_filled(uint16_t x1,
+                              uint16_t y1,
+                              uint16_t x2,
+                              uint16_t y2,
+                              uint16_t x3,
+                              uint16_t y3,
+                              uint16_t color = 0xFFFF,
+                              LogLevel log_level = LOG_LEVEL_TRACE,
+                              bool blocking = false)
     {
       invoke_graphics<AckOnly>("draw_triangle_filled", log_level, blocking, {0xFF59,
-        x1, y1, x2, y2, x3, y3, color
+                                                                             x1, y1, x2, y2, x3, y3, color
       });
     }
 
@@ -208,7 +261,7 @@ namespace diablo
     void move_origin(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       invoke_graphics<AckOnly>("move_origin", log_level, blocking, {0xFF81,
-        x, y
+                                                                    x, y
       });
     }
 
@@ -221,8 +274,8 @@ namespace diablo
     uint16_t outline_color(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("outline_color", log_level, true, {0xFF41,
-        setting
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                          setting
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -233,8 +286,8 @@ namespace diablo
     uint16_t contrast(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("contrast", log_level, true, {0xFF40,
-        setting
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                     setting
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -247,8 +300,8 @@ namespace diablo
     uint16_t line_pattern(uint16_t pattern, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("line_pattern", log_level, true, {0xFF3F,
-        pattern
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                         pattern
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -264,8 +317,8 @@ namespace diablo
     uint16_t screen_mode(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("screen_mode", log_level, true, {0xFF42,
-        setting
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                        setting
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -277,9 +330,12 @@ namespace diablo
      */
     uint16_t transparency(bool enabled, LogLevel log_level = LOG_LEVEL_INFO)
     {
+      static uint8_t response_words = 1;
       return invoke_graphics<uint16_t>("transparency", log_level, true, {0xFF44,
-        enabled ? 1 : 0
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                         enabled ? (uint16_t) 1 : (uint16_t) 0
+                                       },
+                                       [this]() -> uint16_t { return read_word(); },
+                                       response_words);
     }
 
     /*
@@ -291,8 +347,8 @@ namespace diablo
     uint16_t transparent_color(uint16_t color, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("transparent_color", log_level, true, {0xFF45,
-        color
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                              color
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -308,8 +364,8 @@ namespace diablo
     uint16_t set_graphics_parameters(uint16_t function, uint16_t value, LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<uint16_t>("set_graphics_parameters", log_level, true, {0xFF83,
-        function, value
-      }, [this]()->uint16_t{return read_word();}, 1);
+                                                                                    function, value
+      }, [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /////////////////////////////////////    5.3 Media Commands    /////////////////////////////////////
@@ -324,7 +380,7 @@ namespace diablo
     bool media_init(LogLevel log_level = LOG_LEVEL_INFO)
     {
       return invoke_graphics<bool>("media_init", log_level, true, {0xFF25
-      }, [this]()->bool{return 1 == read_word();}, 1);
+      }, [this]() -> bool { return 1 == read_word(); }, 1);
     }
 
     /*
@@ -336,7 +392,8 @@ namespace diablo
     void media_set_byte(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       invoke_graphics<AckOnly>("media_set_byte", log_level, blocking, {0xFF2F,
-        (uint16_t)(address >> 16), (uint16_t)(address & 0xFFFF)
+                                                                       (uint16_t)(address >> 16),
+                                                                       (uint16_t)(address & 0xFFFF)
       });
     }
 
@@ -348,7 +405,8 @@ namespace diablo
     void media_set_sector(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       invoke_graphics<AckOnly>("media_set_sector", log_level, blocking, {0xFF2E,
-        (uint16_t)(address >> 16), (uint16_t)(address & 0xFFFF)
+                                                                         (uint16_t)(address >> 16),
+                                                                         (uint16_t)(address & 0xFFFF)
       });
     }
 
@@ -364,12 +422,41 @@ namespace diablo
     void media_image_raw(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
       invoke_graphics<AckOnly>("media_image_raw", log_level, blocking, {0xFF27,
-        x, y
+                                                                        x, y
       });
     }
 
+    /**
+      * Convenience function to wrap up setting transparency and displaying an image from a sector.
+      */
+    void media_image_raw(uint16_t x,
+                         uint16_t y,
+                         uint16_t transparency_color,
+                         uint32_t sector,
+                         LogLevel log_level = LOG_LEVEL_TRACE,
+                         bool blocking = false)
+    {
+      media_set_sector(sector, log_level);
+      transparency(true, log_level);
+      transparent_color(transparency_color, log_level);
+      media_image_raw(x, y, log_level, blocking);
+    }
+
+    /**
+      * Convenience function to wrap up displaying an image from a sector.
+      */
+    void media_image_raw(uint16_t x,
+                         uint16_t y,
+                         uint32_t sector,
+                         LogLevel log_level = LOG_LEVEL_TRACE,
+                         bool blocking = false)
+    {
+      media_set_sector(sector, log_level);
+      media_image_raw(x, y, log_level, blocking);
+    }
+
   private:
-    typedef std::function<void ()> Callable;
+    typedef std::function<void()> Callable;
     typedef uint8_t AckOnly;
 
     const Logger log;
@@ -379,28 +466,37 @@ namespace diablo
     const char *previous_command = "";
     Stream *serial;
 
-    static AckOnly no_response(){return 0;}
+    static AckOnly no_response()
+    { return 0; }
 
     // Emits a log message for how long the function took at the indicated log level.
     // Handles fetching the ack for a previous command if necessary.
-    template<typename Response, typename Responder = std::function<Response ()>>
-    Response invoke_graphics_compound_request(const char *name, LogLevel level, bool blocking, std::vector<std::vector<uint16_t>> request, Responder responder=no_response, uint8_t response_words=0)
+    template<typename Response, typename Responder = std::function < Response()>>
+    Response
+
+    invoke_graphics_compound_request(const char *name,
+                                     LogLevel level,
+                                     bool blocking,
+                                     std::vector <std::vector<uint16_t>> request,
+                                     Responder responder = no_response,
+                                     uint8_t response_words = 0)
     {
       log.trace("Invoking: %s", name);
       unsigned long start = millis();
 
       // Handle leftover state
-      if(pending_ack)
+      if (pending_ack)
       {
-        if(!ack()) return Response();
+        if (!ack())
+        { return Response(); }
         pending_ack = false;
-        log.trace("Previous command ack. Command: %s, %dms", previous_command, millis() - start);
+        log.trace("Previous command ack. Command: %s, %dms", previous_command, (int) (millis() - start));
         start = millis();
       }
-      while(outstanding_words > 0)
+      while (outstanding_words > 0)
       {
         uint16_t garbage = read_word();
-        if(garbage == 0xDEAD)
+        if (garbage == 0xDEAD)
         {
           log.error("Error waiting for response from: %s", previous_command);
           return Response();
@@ -410,13 +506,14 @@ namespace diablo
 
 
       log.trace("Writing request");
-      for(std::vector<uint16_t> &portion : request) write_words(portion);
+      for (std::vector <uint16_t> &portion : request)
+      { write_words(portion); }
 
 
-      if(blocking)
+      if (blocking)
       {
         log.trace("Blocking for ACK");
-        if(!ack())
+        if (!ack())
         {
           pending_ack = true;
         }
@@ -429,50 +526,58 @@ namespace diablo
       // Get the response.
       // If we need to ack first, we can't get the response & it'll be ignored.
       Response r;
-      if(pending_ack)
+      if (pending_ack)
       {
         outstanding_words += response_words;
         r = Response();
-      }
-      else
+      } else
       {
         log.trace("Getting response");
         r = responder();
       }
-      log(level, "Latency %s: %dms", name, millis() - start);
+      log(level, "Latency %s: %dms", name, (int) (millis() - start));
       return r;
     }
 
-    template<typename Response, typename Responder = std::function<Response ()>>
-    Response invoke_graphics(const char *name, LogLevel level, bool blocking, std::vector<uint16_t> request, Responder responder=no_response, uint8_t response_words=0)
+    template<typename Response, typename Responder = std::function < Response()>>
+    Response
+
+    invoke_graphics(const char *name,
+                    LogLevel level,
+                    bool blocking,
+                    std::vector <uint16_t> request,
+                    Responder responder = no_response,
+                    uint8_t response_words = 0)
     {
-      return invoke_graphics_compound_request<Response>(name, level, blocking, {request}, responder, response_words);
+      return invoke_graphics_compound_request < Response >
+             (name, level, blocking, {request}, responder, response_words);
     }
 
     // Block for ACK byte.
     bool ack()
     {
       static uint8_t timeout_length = 100;
-      static uint8_t give_up_length = 4000;
+      static uint16_t give_up_length = 1000;
       unsigned long timeout = millis() + timeout_length;
       unsigned long give_up = millis() + give_up_length;
       int response = -1;
       do
       {
-        if(millis() > timeout)
+        if (millis() > timeout)
         {
-          if(millis() > give_up) break;
+          if (millis() > give_up)
+          { break; }
           log.warn("Timing out waiting for ACK :-(");
           timeout = millis() + timeout_length;
         }
-        if(serial->available() > 0) response = serial->read();
-      } while(response == -1);
-      if(response == 0x06)
+        if (serial->available() > 0)
+        { response = serial->read(); }
+      } while (response == -1);
+      if (response == 0x06)
       {
         log.trace("Successful ack");
         return true;
-      }
-      else
+      } else
       {
         log.error("Failed ack: %d", response);
         return false;
@@ -480,9 +585,9 @@ namespace diablo
     }
 
     // MostSignificantByte, LeastSignificantByte for each 2 byte word.
-    void write_words(std::vector<uint16_t> &words)
+    void write_words(std::vector <uint16_t> &words)
     {
-      for(const auto &word : words)
+      for (const auto &word : words)
       {
         serial->write((uint8_t)(word >> 8));
         serial->write((uint8_t)(word & 0xFF));
@@ -492,14 +597,14 @@ namespace diablo
     uint16_t read_word()
     {
       static uint8_t timeout_length = 100;
-      static uint8_t give_up_length = 1000;
+      static uint16_t give_up_length = 1000;
       unsigned long timeout = millis() + timeout_length;
       unsigned long give_up = millis() + give_up_length;
-      while(serial->available() < 2)
+      while (serial->available() < 2)
       {
-        if(millis() > timeout)
+        if (millis() > timeout)
         {
-          if(millis() > give_up)
+          if (millis() > give_up)
           {
             return 0xDEAD;
           }
@@ -507,7 +612,7 @@ namespace diablo
           timeout = millis() + timeout_length;
         }
       }
-      return ((uint16_t)serial->read() << 8) | (uint16_t)serial->read();
+      return ((uint16_t) serial->read() << 8) | (uint16_t) serial->read();
     }
   };
 }
