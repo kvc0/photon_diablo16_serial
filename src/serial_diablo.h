@@ -17,6 +17,7 @@ namespace diablo
   class Diablo
   {
   public:
+    typedef std::function<void()> Runnable;
     Diablo(Stream &serial) :
         log("app.diablo"),
         pending_ack(false),
@@ -42,7 +43,10 @@ namespace diablo
       */
     void clear(LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("clear", log_level, blocking, {0xFF82});
+      std::vector<uint16_t> words = {
+          0xFF82
+      };
+      invoke_graphics<AckOnly>("clear", log_level, blocking, words);
     }
 
     /*
@@ -56,9 +60,11 @@ namespace diablo
                      LogLevel log_level = LOG_LEVEL_TRACE,
                      bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_circle", log_level, blocking, {0xFF78,
-                                                                    x, y, radius, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF78,
+          x, y, radius, color
+      };
+      invoke_graphics<AckOnly>("draw_circle", log_level, blocking, words);
     }
 
     /*
@@ -72,9 +78,11 @@ namespace diablo
                             LogLevel log_level = LOG_LEVEL_TRACE,
                             bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_circle_filled", log_level, blocking, {0xFF77,
-                                                                           x, y, radius, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF77,
+          x, y, radius, color
+      };
+      invoke_graphics<AckOnly>("draw_circle_filled", log_level, blocking, words);
     }
 
     /*
@@ -95,9 +103,11 @@ namespace diablo
                    LogLevel log_level = LOG_LEVEL_TRACE,
                    bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_line", log_level, blocking, {0xFF7D,
-                                                                  x1, y1, x2, y2, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF7D,
+          x1, y1, x2, y2, color
+      };
+      invoke_graphics<AckOnly>("draw_line", log_level, blocking, words);
     }
 
     /*
@@ -116,9 +126,11 @@ namespace diablo
                         LogLevel log_level = LOG_LEVEL_TRACE,
                         bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_rectangle", log_level, blocking, {0xFF7A,
-                                                                       x1, y1, x2, y2, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF7A,
+          x1, y1, x2, y2, color
+      };
+      invoke_graphics<AckOnly>("draw_rectangle", log_level, blocking, words);
     }
 
     /*
@@ -139,9 +151,11 @@ namespace diablo
                                LogLevel log_level = LOG_LEVEL_TRACE,
                                bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_rectangle_filled", log_level, blocking, {0xFF79,
-                                                                              x1, y1, x2, y2, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF79,
+          x1, y1, x2, y2, color
+      };
+      invoke_graphics<AckOnly>("draw_rectangle_filled", log_level, blocking, words);
     }
 
     /*
@@ -161,9 +175,10 @@ namespace diablo
                        bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polyline", log_level, blocking, {
+      std::vector<std::vector<uint16_t>> compound_words = {
           {0x0015, n}, vertices, {color}
-      });
+      };
+      invoke_graphics_compound_request<AckOnly>("draw_polyline", log_level, blocking, compound_words);
     }
 
     /*
@@ -184,9 +199,10 @@ namespace diablo
                       bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polygon", log_level, blocking, {
+      std::vector<std::vector<uint16_t>> compound_words = {
           {0x0013, n}, vertices, {color}
-      });
+      };
+      invoke_graphics_compound_request<AckOnly>("draw_polygon", log_level, blocking, compound_words);
     }
 
     /*
@@ -206,9 +222,10 @@ namespace diablo
                              bool blocking = false)
     {
       uint16_t n = vertices.size() / 2;
-      invoke_graphics_compound_request<AckOnly>("draw_polygon_filled", log_level, blocking, {
+      std::vector<std::vector<uint16_t>> compound_words = {
           {0x0014, n}, vertices, {color}
-      });
+      };
+      invoke_graphics_compound_request<AckOnly>("draw_polygon_filled", log_level, blocking, compound_words);
     }
 
     /*
@@ -227,9 +244,11 @@ namespace diablo
                        LogLevel log_level = LOG_LEVEL_TRACE,
                        bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_triangle", log_level, blocking, {0xFF74,
-                                                                      x1, y1, x2, y2, x3, y3, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF74,
+          x1, y1, x2, y2, x3, y3, color
+      };
+      invoke_graphics<AckOnly>("draw_triangle", log_level, blocking, words);
     }
 
     /*
@@ -247,9 +266,11 @@ namespace diablo
                               LogLevel log_level = LOG_LEVEL_TRACE,
                               bool blocking = false)
     {
-      invoke_graphics<AckOnly>("draw_triangle_filled", log_level, blocking, {0xFF59,
-                                                                             x1, y1, x2, y2, x3, y3, color
-      });
+      std::vector<uint16_t> words = {
+          0xFF59,
+          x1, y1, x2, y2, x3, y3, color
+      };
+      invoke_graphics<AckOnly>("draw_triangle_filled", log_level, blocking, words);
     }
 
     /*
@@ -260,9 +281,11 @@ namespace diablo
      */
     void move_origin(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("move_origin", log_level, blocking, {0xFF81,
-                                                                    x, y
-      });
+      std::vector<uint16_t> words = {
+          0xFF81,
+          x, y
+      };
+      invoke_graphics<AckOnly>("move_origin", log_level, blocking, words);
     }
 
     /*
@@ -273,9 +296,12 @@ namespace diablo
      */
     uint16_t outline_color(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("outline_color", log_level, true, {0xFF41,
-                                                                          setting
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF41,
+          setting
+      };
+      return invoke_graphics<uint16_t>("outline_color", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -285,9 +311,12 @@ namespace diablo
      */
     uint16_t contrast(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("contrast", log_level, true, {0xFF40,
-                                                                     setting
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF40,
+          setting
+      };
+      return invoke_graphics<uint16_t>("contrast", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -299,9 +328,12 @@ namespace diablo
      */
     uint16_t line_pattern(uint16_t pattern, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("line_pattern", log_level, true, {0xFF3F,
-                                                                         pattern
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF3F,
+          pattern
+      };
+      return invoke_graphics<uint16_t>("line_pattern", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -316,9 +348,12 @@ namespace diablo
      */
     uint16_t screen_mode(uint16_t setting, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("screen_mode", log_level, true, {0xFF42,
-                                                                        setting
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF42,
+          setting
+      };
+      return invoke_graphics<uint16_t>("screen_mode", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -331,9 +366,11 @@ namespace diablo
     uint16_t transparency(bool enabled, LogLevel log_level = LOG_LEVEL_INFO)
     {
       static uint8_t response_words = 1;
-      return invoke_graphics<uint16_t>("transparency", log_level, true, {0xFF44,
-                                                                         enabled ? (uint16_t) 1 : (uint16_t) 0
-                                       },
+      std::vector<uint16_t> words = {
+          0xFF44,
+          enabled ? (uint16_t) 1 : (uint16_t) 0
+      };
+      return invoke_graphics<uint16_t>("transparency", log_level, true, words,
                                        [this]() -> uint16_t { return read_word(); },
                                        response_words);
     }
@@ -346,9 +383,12 @@ namespace diablo
      */
     uint16_t transparent_color(uint16_t color, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("transparent_color", log_level, true, {0xFF45,
-                                                                              color
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF45,
+          color
+      };
+      return invoke_graphics<uint16_t>("transparent_color", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /*
@@ -363,9 +403,12 @@ namespace diablo
      */
     uint16_t set_graphics_parameters(uint16_t function, uint16_t value, LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<uint16_t>("set_graphics_parameters", log_level, true, {0xFF83,
-                                                                                    function, value
-      }, [this]() -> uint16_t { return read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF83,
+          function, value
+      };
+      return invoke_graphics<uint16_t>("set_graphics_parameters", log_level, true, words,
+                                       [this]() -> uint16_t { return read_word(); }, 1);
     }
 
     /////////////////////////////////////    5.3 Media Commands    /////////////////////////////////////
@@ -379,8 +422,11 @@ namespace diablo
      */
     bool media_init(LogLevel log_level = LOG_LEVEL_INFO)
     {
-      return invoke_graphics<bool>("media_init", log_level, true, {0xFF25
-      }, [this]() -> bool { return 1 == read_word(); }, 1);
+      std::vector<uint16_t> words = {
+          0xFF25
+      };
+      return invoke_graphics<bool>("media_init", log_level, true, words,
+                                   [this]() -> bool { return 1 == read_word(); }, 1);
     }
 
     /*
@@ -391,10 +437,12 @@ namespace diablo
      */
     void media_set_byte(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_set_byte", log_level, blocking, {0xFF2F,
-                                                                       (uint16_t)(address >> 16),
-                                                                       (uint16_t)(address & 0xFFFF)
-      });
+      std::vector<uint16_t> words = {
+          0xFF2F,
+          (uint16_t)(address >> 16),
+          (uint16_t)(address & 0xFFFF)
+      };
+      invoke_graphics<AckOnly>("media_set_byte", log_level, blocking, words);
     }
 
     /*
@@ -404,10 +452,35 @@ namespace diablo
      */
     void media_set_sector(uint32_t address, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_set_sector", log_level, blocking, {0xFF2E,
-                                                                         (uint16_t)(address >> 16),
-                                                                         (uint16_t)(address & 0xFFFF)
-      });
+      std::vector<uint16_t> words = {
+          0xFF2E,
+          (uint16_t)(address >> 16),
+          (uint16_t)(address & 0xFFFF)
+      };
+      invoke_graphics<AckOnly>("media_set_sector", log_level, blocking, words);
+    }
+
+    /*
+     * The Write Sector command writes 512 bytes (256 words) from a source memory block into the uSD card.
+     * After the write the Sect pointer is automatically incremented by 1
+     *
+     * 5.3.5
+     */
+    bool media_write_sector(std::vector<uint8_t> &sector, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    {
+      std::function<void ()> request = [&sector, this]()->void {
+        write_word(0x0017);
+        write_bytes(sector);
+      };
+      bool success;
+      int attempt = 0;
+      do
+      {
+        success = invoke<bool>("media_set_sector", log_level, true, request,
+                               [this]() -> bool { return 1 == read_word(); }, 1);
+        attempt ++;
+      } while(!success && attempt < 10);
+      return success;
     }
 
     /*
@@ -421,9 +494,10 @@ namespace diablo
      */
     void media_image_raw(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
     {
-      invoke_graphics<AckOnly>("media_image_raw", log_level, blocking, {0xFF27,
-                                                                        x, y
-      });
+      std::vector<uint16_t> words = {0xFF27,
+                                     x, y
+      };
+      invoke_graphics<AckOnly>("media_image_raw", log_level, blocking, words);
     }
 
     /**
@@ -455,8 +529,9 @@ namespace diablo
       media_image_raw(x, y, log_level, blocking);
     }
 
+    
+
   private:
-    typedef std::function<void()> Callable;
     typedef uint8_t AckOnly;
 
     const Logger log;
@@ -465,6 +540,7 @@ namespace diablo
     uint8_t outstanding_words;
     const char *previous_command = "";
     Stream *serial;
+    std::vector<std::pair<String, Runnable>> deduping_requests;
 
     static AckOnly no_response()
     { return 0; }
@@ -472,14 +548,26 @@ namespace diablo
     // Emits a log message for how long the function took at the indicated log level.
     // Handles fetching the ack for a previous command if necessary.
     template<typename Response, typename Responder = std::function < Response()>>
-    Response
+    Response invoke_graphics_compound_request(const char *name,
+                                              LogLevel level,
+                                              bool blocking,
+                                              std::vector <std::vector<uint16_t>> &compound_body,
+                                              Responder responder = no_response,
+                                              uint8_t response_words = 0)
+    {
+      std::function<void ()> request = [&compound_body, this]() -> void { write_compound_words(compound_body); };
+      return invoke<Response>(name, level, blocking, request, responder, response_words);
+    }
 
-    invoke_graphics_compound_request(const char *name,
-                                     LogLevel level,
-                                     bool blocking,
-                                     std::vector <std::vector<uint16_t>> request,
-                                     Responder responder = no_response,
-                                     uint8_t response_words = 0)
+    // Emits a log message for how long the function took at the indicated log level.
+    // Handles fetching the ack for a previous command if necessary.
+    template<typename Response, typename Responder = std::function < Response()>>
+    Response invoke(const char *name,
+                    LogLevel level,
+                    bool blocking,
+                    std::function<void ()> &request,
+                    Responder responder = no_response,
+                    uint8_t response_words = 0)
     {
       log.trace("Invoking: %s", name);
       unsigned long start = millis();
@@ -506,9 +594,7 @@ namespace diablo
 
 
       log.trace("Writing request");
-      for (std::vector <uint16_t> &portion : request)
-      { write_words(portion); }
-
+      request();
 
       if (blocking)
       {
@@ -540,17 +626,16 @@ namespace diablo
     }
 
     template<typename Response, typename Responder = std::function < Response()>>
-    Response
-
-    invoke_graphics(const char *name,
-                    LogLevel level,
-                    bool blocking,
-                    std::vector <uint16_t> request,
-                    Responder responder = no_response,
-                    uint8_t response_words = 0)
+    Response invoke_graphics(const char *name,
+                             LogLevel level,
+                             bool blocking,
+                             std::vector <uint16_t> &request,
+                             Responder responder = no_response,
+                             uint8_t response_words = 0)
     {
+      std::vector<std::vector<uint16_t>> compound_request = {request};
       return invoke_graphics_compound_request < Response >
-             (name, level, blocking, {request}, responder, response_words);
+             (name, level, blocking, compound_request, responder, response_words);
     }
 
     // Block for ACK byte.
@@ -584,14 +669,30 @@ namespace diablo
       }
     }
 
+    void write_bytes(std::vector<uint8_t> &raw_request)
+    {
+      for(uint8_t b : raw_request) serial->write(b);
+    }
+
+    void write_compound_words(std::vector<std::vector <uint16_t>> &compound_request)
+    {
+      for (std::vector <uint16_t> &portion : compound_request)
+      { write_words(portion); }
+    }
+
     // MostSignificantByte, LeastSignificantByte for each 2 byte word.
     void write_words(std::vector <uint16_t> &words)
     {
       for (const auto &word : words)
       {
-        serial->write((uint8_t)(word >> 8));
-        serial->write((uint8_t)(word & 0xFF));
+        write_word(word);
       }
+    }
+
+    inline void write_word(uint16_t word)
+    {
+      serial->write((uint8_t)(word >> 8));
+      serial->write((uint8_t)(word & 0xFF));
     }
 
     uint16_t read_word()
