@@ -1,6 +1,8 @@
 #pragma once
 
 #include <application.h>
+#include <algorithm>
+#include <deque>
 #include <vector>
 
 namespace diablo
@@ -24,6 +26,64 @@ namespace diablo
         outstanding_words(0),
         serial(&serial)
     {}
+
+      /**
+       * NOTE:  If you're deferring, you might want to see advance()
+       *
+       * Do the thing when it is the named event's turn on the Diablo.
+       * If the Diablo is busy and you've already got something to do for the named event,
+       *   that old call is deduped into this new thing to do.
+       * Be mindful that you only dedupe "compatible" events under the same name.
+       *
+       * Example invocation:
+       * diablo->defer("sensor 1", [diablo](){diablo->draw_circle(20, 40, 10);});
+       * diablo->defer("sensor 2", [diablo](){diablo->draw_circle(40, 80, 20);});
+       *
+       * These commands will return immediately, and as you call advance(), your application will skip
+       *   blocking until the screen is returning its response.
+       * Invocation of commands inside the deferral queue are subject to each command's concurrency
+       *   setting.  That is, if you set `blocking = true` on a command, when that command is run, it
+       *   will block.  This is useful for quick settings changes, but less desirable when loading a
+       *   large image from the SD card.
+       *
+       * @param name The name of the event you'd like to defer and dedupe.
+       * @param thing The dedupable thing to do.
+       */
+      void defer(String name, Runnable thing)
+      {
+        std::deque<std::pair<String, Runnable>>::iterator duplicate = std::find_if(std::begin(request_queue), std::end(request_queue), [&name](const std::pair<String, Runnable>& pair){return name == pair.first;});
+        if(duplicate != std::end(request_queue))
+        {
+            (*duplicate).second = thing;
+        }
+        else
+        {
+            request_queue.push_back({name, thing});
+        }
+        advance();
+      }
+
+      /**
+       * NOTE:  Don't bother with this unless you use defer()
+       * If you defer often enough, maybe you don't even care about calling advance yourself.
+       *
+       * Tries to get the next thing going on the Diablo.
+       */
+      void advance()
+      {
+        if(request_queue.empty() ||
+            (pending_ack && serial->available() < outstanding_words))
+        {
+            // Still waiting for the ack to come back.
+            // Maybe still waiting for the rest of the response too.
+            // Either way, we're too busy to hang around in here for something to happen
+            //   on the screen.  Let's just unblock the loop and rock on!
+            return;
+        }
+        std::pair<String, Runnable> deferred = request_queue.front();
+        request_queue.pop_front(); // lulz, pop doesn't return what it removed.  Smooth, Stroustrup.
+        deferred.second();
+      }
 
     /**
       * The Clear Screen command clears the screen using the current background colour. This
@@ -279,13 +339,13 @@ namespace diablo
      *
      * 5.2.16
      */
-    void move_origin(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    void move_origin(uint16_t x, uint16_t y, LogLevel log_level = LOG_LEVEL_TRACE)
     {
       std::vector<uint16_t> words = {
           0xFF81,
           x, y
       };
-      invoke_graphics<AckOnly>("move_origin", log_level, blocking, words);
+      invoke_graphics<AckOnly>("move_origin", log_level, true, words);
     }
 
     /*
@@ -466,7 +526,7 @@ namespace diablo
      *
      * 5.3.5
      */
-    bool media_write_sector(std::vector<uint8_t> &sector, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = false)
+    bool media_write_sector(std::vector<uint8_t> &sector, LogLevel log_level = LOG_LEVEL_TRACE, bool blocking = true)
     {
       std::function<void ()> request = [&sector, this]()->void {
         write_word(0x0017);
@@ -476,10 +536,10 @@ namespace diablo
       int attempt = 0;
       do
       {
-        success = invoke<bool>("media_set_sector", log_level, true, request,
+        success = invoke<bool>("media_set_sector", log_level, blocking, request,
                                [this]() -> bool { return 1 == read_word(); }, 1);
         attempt ++;
-      } while(!success && attempt < 10);
+      } while(blocking && !success && attempt < 10);
       return success;
     }
 
@@ -529,8 +589,6 @@ namespace diablo
       media_image_raw(x, y, log_level, blocking);
     }
 
-    
-
   private:
     typedef uint8_t AckOnly;
 
@@ -540,7 +598,7 @@ namespace diablo
     uint8_t outstanding_words;
     const char *previous_command = "";
     Stream *serial;
-    std::vector<std::pair<String, Runnable>> deduping_requests;
+    std::deque<std::pair<String, Runnable>> request_queue;
 
     static AckOnly no_response()
     { return 0; }
